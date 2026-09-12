@@ -1,0 +1,43 @@
+# --- Flutter / Dart ---
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+**/android/.gradle
+**/android/captures/
+**/android/local.properties
+**/android/key.properties
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/ephemeral
+*.apk
+*.aab
+# --- .NET / C# ---
+bin/
+obj/
+*.user
+*.suo
+.vs/
+# --- Node / Cordova ---
+node_modules/
+platforms/
+plugins/
+# --- Αρχεια που δεν χρειαζονται στο repo (build output / μεγαλα binaries) ---
+*.zip
+*.rar
+*.7z
+*.iso
+*.msi
+*.exe
+*.dll
+# --- Γενικα ---
+*.log
+Thumbs.db
+.DS_Store
+*.tmp
+*.bak
