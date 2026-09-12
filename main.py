@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pathlib import Path
 import sqlite3
+import pandas as pd
 
 app = FastAPI()
 
@@ -17,6 +19,25 @@ def get_db_connection():
     conn = sqlite3.connect('app.db')
     conn.row_factory = sqlite3.Row
     return conn
+
+
+@app.get("/publishers")
+def get_publishers():
+    file_path = Path("publishers.xlsx")
+    if not file_path.is_file():
+        return {"publishers": []}
+
+    try:
+        publishers_column = pd.read_excel(file_path, usecols=[0]).iloc[:, 0]
+    except (OSError, ValueError, ImportError):
+        return {"publishers": []}
+
+    publishers = [
+        str(value).strip()
+        for value in publishers_column.dropna()
+        if str(value).strip()
+    ]
+    return {"publishers": publishers}
 
 
 # --- GET: Διάβασμα όλων των εγγραφών ---
