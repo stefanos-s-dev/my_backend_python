@@ -23,9 +23,10 @@ def get_db_connection():
 
 @app.get("/publishers")
 def get_publishers():
-    file_path = Path("publishers.xlsx")
-    if not file_path.is_file():
+    xlsx_files = list(Path(".").glob("*.xlsx"))
+    if not xlsx_files:
         return {"publishers": []}
+    file_path = xlsx_files[0]
 
     try:
         publishers_column = pd.read_excel(file_path, usecols=[0]).iloc[:, 0]
