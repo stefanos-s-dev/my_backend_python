@@ -59,6 +59,35 @@ def get_publishers():
     return {"publishers": publishers}
 
 
+@app.post("/login")
+def login(credentials: dict):
+    username = str(credentials.get("username", "")).strip().casefold()
+    password = str(credentials.get("password", "")).strip()
+    if not username or not password:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    xlsx_files = list(Path(".").glob("*.xlsx"))
+    if not xlsx_files:
+        raise HTTPException(status_code=503, detail="Credentials file unavailable")
+
+    try:
+        credentials_df = pd.read_excel(
+            xlsx_files[0],
+            usecols=["publisher", "Email", "Password"],
+        ).fillna("")
+    except (OSError, ValueError, ImportError):
+        raise HTTPException(status_code=503, detail="Credentials file unavailable")
+
+    for _, row in credentials_df.iterrows():
+        publisher = str(row["publisher"]).strip().casefold()
+        email = str(row["Email"]).strip().casefold()
+        stored_password = str(row["Password"]).strip()
+        if username in {publisher, email} and password == stored_password:
+            return {"authenticated": True}
+
+    raise HTTPException(status_code=401, detail="Invalid credentials")
+
+
 # --- GET: Διάβασμα όλων των εγγραφών ---
 @app.get("/people")
 def get_people():
