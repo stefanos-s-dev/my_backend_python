@@ -21,6 +21,24 @@ def get_db_connection():
     return conn
 
 
+def init_shift_templates_table():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS shift_templates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            day_of_week INTEGER NOT NULL,
+            start_time TEXT NOT NULL,
+            end_time TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
+init_shift_templates_table()
+
+
 @app.get("/publishers")
 def get_publishers():
     xlsx_files = list(Path(".").glob("*.xlsx"))
@@ -51,6 +69,44 @@ def get_people():
     rows = cursor.fetchall()
     conn.close()
     return [dict(row) for row in rows]
+
+
+@app.get("/shift-templates")
+def get_shift_templates():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT rowid as id, * FROM shift_templates ORDER BY day_of_week, start_time")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+@app.post("/shift-templates")
+def create_shift_template(template: dict):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO shift_templates (day_of_week, start_time, end_time)
+        VALUES (?, ?, ?)
+    """, (
+        template.get("day_of_week", ""),
+        template.get("start_time", ""),
+        template.get("end_time", "")
+    ))
+    conn.commit()
+    new_id = cursor.lastrowid
+    conn.close()
+    return {"message": "Η εγγραφή προστέθηκε επιτυχώς!", "id": new_id}
+
+
+@app.delete("/shift-templates/{template_id}")
+def delete_shift_template(template_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM shift_templates WHERE rowid = ?", (template_id,))
+    conn.commit()
+    conn.close()
+    return {"message": f"Η εγγραφή {template_id} διαγράφηκε!"}
 
 
 # --- POST: Προσθήκη νέου μέλους ---
